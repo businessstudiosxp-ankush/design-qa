@@ -1,3 +1,4 @@
+import { useState } from "react";
 import StatusBar from "./components/StatusBar";
 import TopNav from "./components/TopNav";
 import ClassSelector from "./components/ClassSelector";
@@ -12,30 +13,45 @@ import WhatsNew from "./components/WhatsNew";
  * frame is the implementation of Figma node 3235-4269.
  */
 export default function App() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchActive, setIsSearchActive] = useState(false);
+
+  const inSearchMode = isSearchActive || searchQuery.trim() !== "";
+
   return (
     <div className="min-h-screen w-full bg-gray-200 flex justify-center">
       <div
         data-component="MobileFrame"
-        className="relative w-[360px] min-h-screen bg-white shadow-card overflow-hidden"
+        className="relative w-[360px] min-h-screen bg-white shadow-card overflow-hidden flex flex-col"
       >
         {/* Orange gradient backdrop for the header area */}
-        <div className="absolute inset-x-0 top-0 h-[420px] pointer-events-none"
+        <div className="absolute inset-x-0 top-0 h-[420px] pointer-events-none transition-opacity duration-200"
              style={{
                background: "linear-gradient(180deg, #ffb46d 0%, #ffd9b3 60%, #ffffff 100%)",
+               opacity: isSearchActive ? 0.4 : 1,
              }}
         />
 
-        <div className="relative z-10">
+        <div className="relative z-10 flex-shrink-0">
           <StatusBar />
-          <TopNav />
-          <ClassSelector />
-          <CivilServicesBanner />
-          <CategoryChips />
+          <TopNav
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            isSearchActive={isSearchActive}
+            setSearchActive={setIsSearchActive}
+          />
+          {!inSearchMode && (
+            <>
+              <ClassSelector />
+              <CivilServicesBanner />
+              <CategoryChips />
+            </>
+          )}
         </div>
 
-        <div className="relative z-10 bg-white">
-          <TrendingCourses />
-          <WhatsNew />
+        <div className="relative z-10 bg-white flex-1 overflow-y-auto">
+          {!isSearchActive && <TrendingCourses searchQuery={searchQuery} />}
+          {!inSearchMode && <WhatsNew />}
         </div>
       </div>
     </div>
